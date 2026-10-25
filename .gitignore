@@ -1,0 +1,9 @@
+*.root
+*.pyc
+__pycache__/
+*.so
+*.pcm
+*.d
+resultado/reproducao/
+minha-campanha/
+*.log
