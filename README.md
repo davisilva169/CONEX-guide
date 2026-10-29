@@ -1,75 +1,86 @@
-# Operações no CONEX — APOEMA
+# CONEX guide
 
-Guia de Davi S-S para começar no CONEX e analisar chuveiros atmosféricos extensos. O manual anterior de Marcos Olegário contribuiu com o percurso de instalação e a apresentação das árvores. CONEX, ROOT e modelos de interação pertencem a seus respectivos autores; consulte as referências do guia.
+A practical guide to standalone CONEX for the APOEMA group, from installation and a first air-shower simulation to reading ROOT trees and performing basic analyses.
 
-## Começar
+**Read the guide:** [English PDF](CONEX-guide-en.pdf) · [Português brasileiro PDF](CONEX-guide-pt-BR.pdf)
 
-1. Abra ou baixe o [guia em PDF](guia-conex.pdf).
-2. Use **Code > Download ZIP** e extraia o pacote. Preserve as pastas.
-3. Siga a instalação do CONEX e ROOT no guia. Este repositório não instala o simulador nem fornece suas tabelas.
-4. Escolha uma rota: **Python/PyROOT** (seção 7) ou **C++/ROOT** (seção 8). Basta uma.
-5. Gere os arquivos `.root` localmente pelas [receitas de resultado](resultado/README.md).
+Both editions use the same English file paths and executable commands. Choose either **Python/PyROOT** or **C++/ROOT** for analysis; you do not need both routes. The editable LaTeX projects are supplied separately and are not published here.
 
-O PDF final e os códigos são publicados juntos. Os fontes LaTeX e os registros de manutenção não fazem parte deste repositório.
+## Get started
 
-## Organização
-
-| Pasta/arquivo | Conteúdo |
-|---|---|
-| `guia-conex.pdf` | Guia completo |
-| [`script_python/`](script_python/) | Um script PyROOT, cinco operações |
-| [`macros/`](macros/) | Cinco macros C++ equivalentes |
-| [`scripts/`](scripts/) | Campanha e reprodução |
-| [`resultado/`](resultado/) | Receitas, gráficos, resumo e procedência; sem eventos `.root` |
-
-Abra o terminal Linux na raiz do pacote extraído. Ative o ambiente preparado no guia. O caminho `CX` deve apontar à cópia compilada do CONEX.
+1. Download a guide PDF and use **Code > Download ZIP** to obtain the companion files. Extract the archive and preserve its directories.
+2. Follow the Linux or WSL 2 installation route in the guide. Obtain CONEX and model tables through the authors' authorized channels; this repository does not supply or install them.
+3. Run commands from the repository root, with the ROOT environment active and `CX` pointing to your compiled CONEX copy.
+4. Generate event files locally using the [results recipes](results/README.md). Event `.root` files are not available for download here.
+5. Follow section 7 for Python/PyROOT or section 8 for C++/ROOT.
 
 ```bash
 conda activate conex-apoema
-export CX="$HOME/simulacoes/conex-7.801"
-python script_python/conex.py --help
+CX="$HOME/simulations/conex-7.801"
+python python/conex.py --help
 ```
 
-## Python com PyROOT
+Once assigned, `"$CX"` expands automatically to the stored path. Adjust the assignment to your installation; do not replace every later `$CX` by hand. Reactivate the environment and redefine paths in each new terminal session.
 
-Requer o pacote ROOT com PyROOT e a biblioteca padrão do Python. Não exige pandas, NumPy, matplotlib ou uproot para executar este script.
+## Repository layout
+
+| Path | Contents |
+|---|---|
+| `CONEX-guide-en.pdf` | Complete English guide |
+| `CONEX-guide-pt-BR.pdf` | Complete Brazilian Portuguese guide |
+| [`python/`](python/) | One PyROOT script with five analysis operations |
+| [`macros/`](macros/) | Five equivalent C++/ROOT macros |
+| [`scripts/`](scripts/) | Campaign generation and full example reproduction |
+| [`results/`](results/) | Recipes, reference plots, summary and provenance; no event files |
+
+## Python with PyROOT
+
+Requires ROOT with PyROOT and the Python standard library. This script does not require pandas, NumPy, matplotlib or uproot. Define `ARQ`, `A`, `B` and `LIDER` using the [data recipes](results/README.md).
 
 ```bash
-python script_python/conex.py inspecionar "$ARQ"
-python script_python/conex.py perfil "$ARQ" --saida perfil-python
-python script_python/conex.py histograma "$A" --saida histograma-python
-python script_python/conex.py comparar "$A" "$B" --saida comparacao-python
-python script_python/conex.py interacoes "$LIDER" --saida interacoes-python
+python python/conex.py inspect "$ARQ"
+python python/conex.py profile "$ARQ" --output profile-python
+python python/conex.py histogram "$A" --output histogram-python
+python python/conex.py compare "$A" "$B" --output comparison-python
+python python/conex.py interactions "$LIDER" --output interactions-python
 ```
 
-Defina `ARQ`, `A`, `B` e `LIDER` pelos caminhos descritos nas receitas. `--evento 0` é o padrão de perfil e interacoes. Os dados são abertos somente para leitura; as análises recusam sobrescrever resultados.
+`--event 0` is the default for profile and interactions. Input files are opened read-only. Existing output files are refused; choose a new prefix when repeating an analysis. The guide uses `profile-study` for the later detailed example so it does not collide with the first profile.
 
-## C++ com ROOT
+## C++ with ROOT
 
-Baixe a pasta macros inteira: `histograma.C` depende de `comparar.C`. Com as mesmas variáveis:
+Download the whole macros directory: `histogram.C` includes `compare.C`. Use the same data variables:
 
 ```bash
-root -l -b -q "macros/inspecionar.C(\"$ARQ\")"
-root -l -b -q "macros/perfil.C(\"$ARQ\",0,\"perfil-cpp\")"
-root -l -b -q "macros/histograma.C(\"$A\",\"histograma-cpp\")"
-root -l -b -q "macros/comparar.C(\"$A\",\"$B\",\"comparacao-cpp\")"
-root -l -b -q "macros/interacoes.C(\"$LIDER\",0,\"interacoes-cpp\")"
+root -l -b -q "macros/inspect.C(\"$ARQ\")"
+root -l -b -q "macros/profile.C(\"$ARQ\",0,\"profile-cpp\")"
+root -l -b -q "macros/histogram.C(\"$A\",\"histogram-cpp\")"
+root -l -b -q "macros/compare.C(\"$A\",\"$B\",\"comparison-cpp\")"
+root -l -b -q "macros/interactions.C(\"$LIDER\",0,\"interactions-cpp\")"
 ```
 
-As duas interfaces cobrem as mesmas operações. Não é preciso rodar as duas.
+Both interfaces implement the same profile conventions, selection and summaries. The illustrative TTreeReader excerpt in the guide is not a standalone program; execute the complete macro instead.
 
-## Reprodução de uma vez
+## Reproduce the examples
 
-Depois de instalar e compilar o CONEX, execute na raiz deste repositório:
+After installing ROOT and compiling CONEX, run at the repository root:
 
 ```bash
-bash scripts/reproduzir.sh "$CX" "$PWD/resultado/reproducao" python
+bash scripts/reproduce.sh "$CX" "$PWD/results/reproduction" python
 ```
 
-O destino precisa ser novo. O terceiro argumento é opcional: `python` é o padrão; `cpp` escolhe as macros. Serão gerados 26 eventos: um primeiro chuveiro, 12 prótons, 12 ferros e um evento com `-K 2`. Os resultados, logs e análises ficam em `resultado/reproducao/` e são ignorados pelo Git. Os scripts não baixam nem compilam o CONEX.
+The destination must be new. The optional third argument is `python` by default or `cpp` for the macro route. The script produces **26 events**: one first shower, 12 protons, 12 iron nuclei and one event with `-K 2`. Logs, configurations and analyses are stored under the destination. Generated `results/reproduction/` is ignored by Git. The scripts do not download or compile CONEX.
 
-## Dados e distribuição
+## Scope, versions and data sharing
 
-Os eventos `.root` ficam fora deste repositório, conforme a condição de consentimento para repasse de eventos presente em `src/urqmd13/Copyright` da distribuição estudada. Reproduza-os localmente. [Procedência dos gráficos e resumos](resultado/PROCEDENCIA.md).
+The reference distribution is stored as `conex2r7.801`, identified by its README as 7.80, with internal version 7801 and output format 2.51. These identifiers have different meanings and are not interchangeable. The guide does not claim this is the newest worldwide release.
 
-CONEX de referência: pasta conex2r7.801, README 7.80, versão interna 7801 e formato de saída 2.51. Esses identificadores não são intercambiáveis. Exemplos validados em Linux pelo WSL 2 com ROOT 6.36.04; isso não comprova suporte nativo ao Windows. As amostras são didáticas e não sustentam conclusões com estatística de pesquisa.
+The examples were validated on Linux through WSL 2 using ROOT 6.36.04 and Python 3.13.17. This does not establish native Windows support. Samples are educational and too small for precision research conclusions.
+
+Event `.root` files are excluded because the studied distribution's `src/urqmd13/Copyright` requires the authors' consent to pass UrQMD-generated events to third parties. Reproduce events locally. Reference plots and aggregate summaries are identified in [provenance](results/PROVENANCE.md).
+
+## Credits
+
+Guide author: **Davi S-S**, APOEMA. The earlier manual by **Marcos Olegário** contributed the installation route and introduction to output trees. The supplied APOEMA template and logo, credited to **DAVI**, retain their visual identity. CONEX, ROOT and interaction models are the work of their respective authors; follow the guide's scientific references and the distribution's citation instructions.
+
+The former `guia-conex-apoema` repository was renamed to `CONEX-guide`. English resource names replace the earlier Portuguese paths; use the commands in the current PDFs.

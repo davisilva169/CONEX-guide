@@ -4,6 +4,6 @@ __pycache__/
 *.so
 *.pcm
 *.d
-resultado/reproducao/
-minha-campanha/
+results/reproduction/
+my-campaign/
 *.log
